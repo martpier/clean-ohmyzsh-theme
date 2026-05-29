@@ -1,8 +1,14 @@
 # Adapted from https://github.com/tobyjamesthomas/pi/blob/master/pi.zsh-theme
 
-PROMPT='${return_status}%{$fg[cyan]%}$(get_pwd)%{$reset_color%} $(git_prompt_info)$(git_remote_status)${prompt_suffix}'
+PROMPT='$(remote_prefix)%{$fg_bold[cyan]%}$(get_pwd)%{$reset_color%} $(git_prompt_info)$(git_remote_status)${prompt_suffix}'
 
-local return_status="%(?:%{$fg_bold[green]%}:%{$fg_bold[red]%})"
+function remote_prefix() {
+  if [[ -n "$SSH_CONNECTION" ]]; then
+    echo "%{$fg[red]%}⌁%{reset_color%} "
+  else
+    echo ""
+  fi
+}
 
 local prompt_suffix="%(?:%{$fg_bold[green]%}:%{$fg[red]%})❯%{$reset_color%} "
 
