@@ -14,6 +14,7 @@ local prompt_suffix="%(?:%{$fg_bold[green]%}:%{$fg[red]%})❯%{$reset_color%} "
 
 precmd() {
   print ""
+  RPROMPT=''
 }
 
 # by shashankmehta (https://github.com/shashankmehta)
@@ -41,3 +42,21 @@ ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE="%{$fg_bold[yellow]%}↑%{$reset_color%} "
 ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE="%{$fg_bold[yellow]%}↓%{$reset_color%} "
 ZSH_THEME_GIT_PROMPT_DIVERGED_REMOTE="%{$fg_bold[yellow]%}↓↑%{$reset_color%} "
 ZSH_THEME_GIT_PROMPT_EQUAL_REMOTE=""
+
+RPROMPT=''
+_kube_update_visibility() {
+  if [[ "$BUFFER" == k* && "$RPROMPT" == '' ]]; then
+    local ctx ns
+    ctx=$(kubectl config current-context 2>/dev/null) || return
+    ns=$(kubectl config view --minify -o jsonpath='{..namespace}' 2>/dev/null)
+    RPROMPT="%{$fg[magenta]%}${ctx}:${ns:-default}%{$reset_color%}"
+    zle reset-prompt
+  fi
+
+  if [[ "$BUFFER" != k* && "$RPROMPT" != '' ]]; then
+    RPROMPT=''
+    zle reset-prompt
+  fi
+}
+autoload -Uz add-zle-hook-widget
+add-zle-hook-widget line-pre-redraw _kube_update_visibility
